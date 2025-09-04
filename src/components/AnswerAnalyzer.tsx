@@ -23,6 +23,16 @@ interface AnswerAnalysis {
     fillerWords: number;
     confidence: number;
   };
+  subScores?: {
+    communication: number;
+    structure: number;
+    content: number;
+  };
+  highlights?: {
+    strengths: string[];
+    weaknesses: string[];
+    tips: string[];
+  };
 }
 
 interface AnswerAnalyzerProps {
@@ -80,6 +90,10 @@ const AnswerAnalyzer = ({ question, answer, onAnalysisComplete }: AnswerAnalyzer
       (Math.min(100, wordCount * 2) * 0.1)
     ));
 
+    const communicationScore = Math.round(Math.max(0, Math.min(100, 100 - fillerCount * 10)));
+    const contentScore = Math.round(Math.max(0, Math.min(100, keywordMatch)));
+    const structureScoreRounded = Math.round(Math.max(0, Math.min(100, structureScore)));
+
     return {
       question,
       answer,
@@ -91,6 +105,13 @@ const AnswerAnalyzer = ({ question, answer, onAnalysisComplete }: AnswerAnalyzer
         fillerWords: fillerCount,
         confidence: Math.round(keywordMatch)
       }
+      ,
+      subScores: {
+        communication: communicationScore,
+        structure: structureScoreRounded,
+        content: contentScore
+      },
+      highlights: generateHighlights(communicationScore, structureScoreRounded, contentScore, generateFeedback(score, keywordMatch, structureScore, fillerCount, wordCount).suggestions)
     };
   };
 
@@ -189,6 +210,35 @@ const AnswerAnalyzer = ({ question, answer, onAnalysisComplete }: AnswerAnalyzer
     }
 
     return feedback;
+  };
+
+  const generateHighlights = (
+    communicationScore: number,
+    structureScore: number,
+    contentScore: number,
+    suggestions: string[]
+  ) => {
+    const strengths: string[] = [];
+    const weaknesses: string[] = [];
+    const tips: string[] = [];
+
+    if (communicationScore >= 75) strengths.push('Clear communication');
+    if (structureScore >= 75) strengths.push('Well-structured answers');
+    if (contentScore >= 75) strengths.push('Strong content relevance');
+
+    if (communicationScore < 60) weaknesses.push('Reduce filler words and improve clarity');
+    if (structureScore < 60) weaknesses.push('Use a clearer structure (try STAR)');
+    if (contentScore < 60) weaknesses.push('Be more specific and relevant to the question');
+
+    // Tips derived from suggestions
+    suggestions.forEach(s => {
+      if (!tips.includes(s)) tips.push(s);
+    });
+
+    // Add a small actionable tip if none provided
+    if (tips.length === 0) tips.push('Practice concise, structured answers using examples.');
+
+    return { strengths, weaknesses, tips };
   };
 
   if (isAnalyzing) {

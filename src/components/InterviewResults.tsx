@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -7,6 +7,9 @@ import {
   Trophy, TrendingUp, Clock, Star, CheckCircle, AlertCircle, 
   RotateCcw, Download, Share2, Home, BarChart3 
 } from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 interface InterviewResultsProps {
   results: {
@@ -17,15 +20,27 @@ interface InterviewResultsProps {
       score: number;
       feedback: string;
       analysis?: {
-        communication: string;
-        structure: string;
-        content: string;
-        suggestions: string[];
+        feedback: {
+          communication: string;
+          structure: string;
+          content: string;
+          suggestions: string[];
+        };
         metrics: {
           wordCount: number;
           speakingTime: number;
           fillerWords: number;
           confidence: number;
+        };
+        subScores?: {
+          communication: number;
+          structure: number;
+          content: number;
+        };
+        highlights?: {
+          strengths?: string[];
+          weaknesses?: string[];
+          tips?: string[];
         };
       };
     }>;
@@ -55,6 +70,21 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
     if (score >= 80) return { label: 'Good', variant: 'secondary' as const };
     if (score >= 70) return { label: 'Average', variant: 'outline' as const };
     return { label: 'Needs Work', variant: 'destructive' as const };
+  };
+
+  const averageSubscore = (results: InterviewResultsProps['results'], key: 'communication' | 'structure' | 'content') => {
+    const values: number[] = results.feedback.map(f => (f.analysis?.subScores ? (f.analysis.subScores as any)[key] : null)).filter(Boolean) as number[];
+    if (values.length === 0) return 0;
+    return Math.round(values.reduce((s, v) => s + v, 0) / values.length);
+  };
+
+  const aggregateTips = (results: InterviewResultsProps['results']) => {
+    const tipsSet = new Set<string>();
+    results.feedback.forEach(f => {
+      const suggestions = f.analysis?.highlights?.tips || [];
+      suggestions.forEach(s => tipsSet.add(s));
+    });
+    return Array.from(tipsSet).slice(0, 10);
   };
 
   return (
@@ -109,7 +139,7 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
           </CardContent>
         </Card>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+  <div className="grid lg:grid-cols-2 gap-8">
           {/* Strengths & Improvements */}
           <div className="space-y-6">
             <Card>
@@ -153,13 +183,60 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
             </Card>
           </div>
 
-          {/* Detailed Feedback */}
+          {/* Detailed Feedback + Charts */}
           <Card>
             <CardHeader>
               <CardTitle>Question-by-Question Analysis</CardTitle>
               <CardDescription>Detailed feedback for each response</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+              {/* Charts */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="p-3 border border-border rounded-lg">
+                  <h4 className="font-medium mb-2">Scores per Question</h4>
+                  <div style={{ width: '100%', height: 180 }}>
+                    <ResponsiveContainer>
+                      <BarChart data={results.feedback.map((f, i) => ({ name: `Q${i+1}`, score: f.score }))}>
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <ReTooltip />
+                        <Bar dataKey="score" fill="#2563EB" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="p-3 border border-border rounded-lg">
+                  <h4 className="font-medium mb-2">Feedback Composition</h4>
+                  <div style={{ width: '100%', height: 180 }}>
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie
+                          data={[{
+                            name: 'Communication', value: averageSubscore(results, 'communication')
+                          },{
+                            name: 'Structure', value: averageSubscore(results, 'structure')
+                          },{
+                            name: 'Content', value: averageSubscore(results, 'content')
+                          }]}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={60}
+                          label
+                        >
+                          <Cell fill="#10B981" />
+                          <Cell fill="#3B82F6" />
+                          <Cell fill="#8B5CF6" />
+                        </Pie>
+                        <Legend />
+                        <ReTooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
               {results.feedback.map((item, index) => (
                 <div key={index} className="border border-border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
@@ -205,6 +282,18 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
                         
                         {/* Feedback Categories */}
                         <div className="space-y-2">
+                  {/* Aggregated Tips */}
+                  <div className="p-3 border border-border rounded-lg bg-background">
+                    <h4 className="font-medium mb-2">Top Actionable Tips</h4>
+                    <ul className="text-sm space-y-1">
+                      {aggregateTips(results).map((tip, ti) => (
+                        <li key={ti} className="flex items-start gap-2">
+                          <span className="text-yellow-600">•</span>
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                           <div className="p-2 bg-green-50 border border-green-200 rounded text-xs">
                             <span className="font-medium text-green-800">Communication:</span> {item.analysis.feedback.communication}
                           </div>
