@@ -86,6 +86,96 @@ const InterviewSession = ({ config, onEndInterview }: InterviewSessionProps) => 
       type: 'closing',
       question: "Do you have any questions about the role or our company? And is there anything else you'd like to share?",
       expectedDuration: 120
+    },
+    {
+      id: 6,
+      type: 'leadership',
+      question: "Describe a time when you led a team to achieve a goal — what was your approach and the outcome?",
+      expectedDuration: 240
+    },
+    {
+      id: 7,
+      type: 'project',
+      question: "Tell me about a project you're most proud of. What was your role and what impact did it have?",
+      expectedDuration: 240
+    },
+    {
+      id: 8,
+      type: 'time-management',
+      question: "How do you prioritize tasks when you have multiple deadlines? Give a concrete example.",
+      expectedDuration: 180
+    },
+    {
+      id: 9,
+      type: 'technical',
+      question: "Describe a difficult technical problem you solved. How did you diagnose and fix it?",
+      expectedDuration: 300
+    },
+    {
+      id: 10,
+      type: 'behavioral',
+      question: "Tell me about a time you failed or made a mistake. What did you learn from it?",
+      expectedDuration: 180
+    },
+    {
+      id: 11,
+      type: 'growth',
+      question: "How do you keep your skills up-to-date? Share resources or routines you follow.",
+      expectedDuration: 120
+    },
+    {
+      id: 12,
+      type: 'communication',
+      question: "Explain a complex idea or technical concept to someone without a technical background.",
+      expectedDuration: 180
+    },
+    {
+      id: 13,
+      type: 'teamwork',
+      question: "Describe a conflict you had with a coworker and how you resolved it.",
+      expectedDuration: 180
+    },
+    {
+      id: 14,
+      type: 'mentoring',
+      question: "Have you ever mentored or coached someone? Describe the experience and the results.",
+      expectedDuration: 180
+    },
+    {
+      id: 15,
+      type: 'planning',
+      question: "How do you estimate timelines for projects? Walk me through your process.",
+      expectedDuration: 180
+    },
+    {
+      id: 16,
+      type: 'decision-making',
+      question: "Walk me through a tough decision you made at work and how you arrived at it.",
+      expectedDuration: 180
+    },
+    {
+      id: 17,
+      type: 'strengths',
+      question: "What are your top strengths and how have they helped you perform well in past roles?",
+      expectedDuration: 120
+    },
+    {
+      id: 18,
+      type: 'weakness',
+      question: "What is an area you are actively working to improve and what steps are you taking?",
+      expectedDuration: 120
+    },
+    {
+      id: 19,
+      type: 'process-improvement',
+      question: "Describe a time you identified and implemented an improvement that increased efficiency or quality.",
+      expectedDuration: 180
+    },
+    {
+      id: 20,
+      type: 'closing',
+      question: "Why should we hire you? What unique value would you bring to this role/team?",
+      expectedDuration: 180
     }
   ];
 
