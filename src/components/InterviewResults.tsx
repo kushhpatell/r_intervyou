@@ -90,6 +90,13 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
 
   const dashboardRef = useRef<HTMLDivElement | null>(null);
 
+  const pieData = [
+    { name: 'Communication', value: averageSubscore(results, 'communication'), color: '#10B981' },
+    { name: 'Structure', value: averageSubscore(results, 'structure'), color: '#3B82F6' },
+    { name: 'Content', value: averageSubscore(results, 'content'), color: '#8B5CF6' }
+  ];
+  const pieTotal = pieData.reduce((s, p) => s + (p.value || 0), 0) || 1;
+
   const downloadDashboard = async () => {
     if (!dashboardRef.current) return;
     const canvas = await html2canvas(dashboardRef.current, { scale: 2 });
@@ -213,34 +220,40 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
 
                 <div className="p-3 border border-border rounded-lg bg-white shadow-sm overflow-hidden">
                   <h4 className="font-medium mb-2">Feedback Composition</h4>
-                  <div className="h-44 flex items-center justify-center">
+                  <div className="h-56 flex items-center justify-center">{/* increased height */}
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={[{
-                            name: 'Communication', value: averageSubscore(results, 'communication')
-                          },{
-                            name: 'Structure', value: averageSubscore(results, 'structure')
-                          },{
-                            name: 'Content', value: averageSubscore(results, 'content')
-                          }]}
+                          data={pieData}
                           dataKey="value"
                           nameKey="name"
                           cx="50%"
                           cy="50%"
-                          innerRadius={28}
-                          outerRadius={56}
+                          innerRadius={36}
+                          outerRadius={72}
                           labelLine={false}
-                          label={({ percent }) => `${Math.round(percent * 100)}%`}
+                          label={false}
                         >
-                          <Cell fill="#10B981" />
-                          <Cell fill="#3B82F6" />
-                          <Cell fill="#8B5CF6" />
+                          {pieData.map((entry, idx) => (
+                            <Cell key={`cell-${idx}`} fill={entry.color} />
+                          ))}
                         </Pie>
-                        <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 12 }} />
                         <ReTooltip />
                       </PieChart>
                     </ResponsiveContainer>
+                  </div>
+
+                  {/* Custom legend to avoid layout overlap */}
+                  <div className="mt-2 flex items-center justify-around">
+                    {pieData.map((p, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm">
+                        <div style={{ background: p.color }} className="w-3 h-3 rounded-full" />
+                        <div className="text-xs">
+                          <div className="font-medium">{p.name}</div>
+                          <div className="text-muted-foreground">{p.value}% ({Math.round((p.value / pieTotal) * 100)}%)</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
