@@ -173,7 +173,7 @@ const InterviewSetup = ({ onStartInterview, onBack }: InterviewSetupProps) => {
                       <SelectValue placeholder="Number of questions" />
                     </SelectTrigger>
                     <SelectContent>
-                      {[15,16,17,18,19,20].map(n => (
+                      {Array.from({ length: 16 }, (_, i) => i + 5).map(n => (
                         <SelectItem key={n} value={String(n)}>{n} Questions</SelectItem>
                       ))}
                     </SelectContent>

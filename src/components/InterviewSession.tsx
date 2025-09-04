@@ -179,14 +179,19 @@ const InterviewSession = ({ config, onEndInterview }: InterviewSessionProps) => 
     }
   ];
 
-  const questions = (Array.isArray(config?.questions) && config.questions.length > 0)
-    ? (config.questions as string[]).map((q: string, idx: number) => ({
+  // Respect a requested question count (5..20). If AI provided questions, use them; otherwise use fallback.
+  const requestedCount = Math.max(5, Math.min(20, config?.questionCount || 15));
+
+  const aiQuestions = Array.isArray(config?.questions) && (config.questions as string[]).length > 0
+    ? (config.questions as string[]).slice(0, requestedCount).map((q: string, idx: number) => ({
         id: idx + 1,
         type: config.type || 'general',
         question: q,
         expectedDuration: 180,
       }))
-    : fallbackQuestions;
+    : null;
+
+  const questions = aiQuestions || fallbackQuestions.slice(0, requestedCount);
 
   const totalQuestions = questions.length;
   const progress = ((currentQuestion + 1) / totalQuestions) * 100;
