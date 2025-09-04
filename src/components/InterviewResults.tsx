@@ -89,57 +89,46 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="w-20 h-20 bg-gradient-primary rounded-full flex items-center justify-center">
-              <Trophy className="h-10 w-10 text-primary-foreground" />
+            <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <Trophy className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold">Interview Complete!</h1>
-          <p className="text-muted-foreground">Here's your detailed performance analysis</p>
+          <h1 className="text-2xl font-semibold">Interview Complete</h1>
+          <p className="text-sm text-muted-foreground">Summary dashboard with insights and visual breakdown</p>
         </div>
-
-        {/* Overall Score */}
-        <Card className="text-center">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Star className="h-5 w-5" />
-              Overall Performance
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className={`text-6xl font-bold ${getScoreColor(results.score)}`}>
-                {results.score}
+        {/* Top row: score card + charts */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-4 w-4" />
+                Overall Score
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className={`text-5xl font-bold ${getScoreColor(results.score)}`}>{results.score}</div>
+              <div className="text-sm text-muted-foreground mt-1">out of 100</div>
+              <div className="mt-3">
+                <Badge variant={getScoreBadge(results.score).variant} className="text-sm px-3 py-1">
+                  {getScoreBadge(results.score).label}
+                </Badge>
               </div>
-              <div className="text-2xl text-muted-foreground">out of 100</div>
-              <Badge variant={getScoreBadge(results.score).variant} className="text-base px-4 py-1">
-                {getScoreBadge(results.score).label}
-              </Badge>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-8 max-w-md mx-auto">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-1">
-                  <Clock className="h-4 w-4" />
-                  Duration
+              <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                <div>
+                  <div className="font-medium">Duration</div>
+                  <div className="text-base">{formatTime(results.duration)}</div>
                 </div>
-                <div className="text-xl font-semibold">{formatTime(results.duration)}</div>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-1">
-                  <BarChart3 className="h-4 w-4" />
-                  Questions
+                <div>
+                  <div className="font-medium">Questions</div>
+                  <div className="text-base">{results.feedback.length}</div>
                 </div>
-                <div className="text-xl font-semibold">{results.feedback.length}</div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-  <div className="grid lg:grid-cols-2 gap-8">
+            </CardContent>
+          </Card>
           {/* Strengths & Improvements */}
           <div className="space-y-6">
             <Card>
@@ -192,21 +181,21 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
             <CardContent className="space-y-4 max-h-96 overflow-y-auto">
               {/* Charts */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="p-3 border border-border rounded-lg">
+                <div className="p-3 border border-border rounded-lg bg-white shadow-sm">
                   <h4 className="font-medium mb-2">Scores per Question</h4>
                   <div style={{ width: '100%', height: 180 }}>
                     <ResponsiveContainer>
                       <BarChart data={results.feedback.map((f, i) => ({ name: `Q${i+1}`, score: f.score }))}>
-                        <XAxis dataKey="name" />
-                        <YAxis />
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
                         <ReTooltip />
-                        <Bar dataKey="score" fill="#2563EB" />
+                        <Bar dataKey="score" fill="#3B82F6" radius={[4,4,0,0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="p-3 border border-border rounded-lg">
+                <div className="p-3 border border-border rounded-lg bg-white shadow-sm">
                   <h4 className="font-medium mb-2">Feedback Composition</h4>
                   <div style={{ width: '100%', height: 180 }}>
                     <ResponsiveContainer>
@@ -230,14 +219,14 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
                           <Cell fill="#3B82F6" />
                           <Cell fill="#8B5CF6" />
                         </Pie>
-                        <Legend />
+                        <Legend verticalAlign="bottom" height={18} />
                         <ReTooltip />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
               </div>
-              {results.feedback.map((item, index) => (
+                {results.feedback.map((item, index) => (
                 <div key={index} className="border border-border rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Question {index + 1}</span>
@@ -281,27 +270,18 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
                         </div>
                         
                         {/* Feedback Categories */}
-                        <div className="space-y-2">
-                  {/* Aggregated Tips */}
-                  <div className="p-3 border border-border rounded-lg bg-background">
-                    <h4 className="font-medium mb-2">Top Actionable Tips</h4>
-                    <ul className="text-sm space-y-1">
-                      {aggregateTips(results).map((tip, ti) => (
-                        <li key={ti} className="flex items-start gap-2">
-                          <span className="text-yellow-600">•</span>
-                          {tip}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div className="p-2 bg-green-50 border border-green-200 rounded text-xs">
-                            <span className="font-medium text-green-800">Communication:</span> {item.analysis.feedback.communication}
+                            <span className="font-medium text-green-800">Communication</span>
+                            <div className="text-muted-foreground mt-1 text-xs">{item.analysis.feedback.communication}</div>
                           </div>
                           <div className="p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-                            <span className="font-medium text-blue-800">Structure:</span> {item.analysis.feedback.structure}
+                            <span className="font-medium text-blue-800">Structure</span>
+                            <div className="text-muted-foreground mt-1 text-xs">{item.analysis.feedback.structure}</div>
                           </div>
                           <div className="p-2 bg-purple-50 border border-purple-200 rounded text-xs">
-                            <span className="font-medium text-purple-800">Content:</span> {item.analysis.feedback.content}
+                            <span className="font-medium text-purple-800">Content</span>
+                            <div className="text-muted-foreground mt-1 text-xs">{item.analysis.feedback.content}</div>
                           </div>
                         </div>
                         
@@ -324,6 +304,58 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Aggregated tips and next steps */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Actionable Tips</CardTitle>
+              <CardDescription>Personalized improvements from this session</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm">
+                {aggregateTips(results).map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
+                    <div>{tip}</div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Strengths</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm">
+                {results.strengths.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-success rounded-full mt-2 flex-shrink-0" />
+                    <div>{s}</div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Areas to Improve</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 text-sm">
+                {results.improvements.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-warning rounded-full mt-2 flex-shrink-0" />
+                    <div>{s}</div>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
         </div>
