@@ -194,24 +194,27 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
             <CardContent className="space-y-4 max-h-96 overflow-y-auto">
               {/* Charts */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div className="p-3 border border-border rounded-lg bg-white shadow-sm">
+                <div className="p-3 border border-border rounded-lg bg-white shadow-sm overflow-hidden">
                   <h4 className="font-medium mb-2">Scores per Question</h4>
-                  <div style={{ width: '100%', height: 180 }}>
-                    <ResponsiveContainer>
-                      <BarChart data={results.feedback.map((f, i) => ({ name: `Q${i+1}`, score: f.score }))}>
-                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                        <YAxis tick={{ fontSize: 12 }} />
+                  <div className="h-44">{/* fixed height to avoid overlap */}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={results.feedback.map((f, i) => ({ name: `Q${i+1}`, score: f.score }))}
+                        margin={{ top: 8, right: 12, left: 0, bottom: 8 }}
+                      >
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
                         <ReTooltip />
-                        <Bar dataKey="score" fill="#3B82F6" radius={[4,4,0,0]} />
+                        <Bar dataKey="score" fill="#3B82F6" radius={[6,6,0,0]} barSize={18} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                <div className="p-3 border border-border rounded-lg bg-white shadow-sm">
+                <div className="p-3 border border-border rounded-lg bg-white shadow-sm overflow-hidden">
                   <h4 className="font-medium mb-2">Feedback Composition</h4>
-                  <div style={{ width: '100%', height: 180 }}>
-                    <ResponsiveContainer>
+                  <div className="h-44 flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={[{
@@ -225,14 +228,16 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
                           nameKey="name"
                           cx="50%"
                           cy="50%"
-                          outerRadius={60}
-                          label
+                          innerRadius={28}
+                          outerRadius={56}
+                          labelLine={false}
+                          label={({ percent }) => `${Math.round(percent * 100)}%`}
                         >
                           <Cell fill="#10B981" />
                           <Cell fill="#3B82F6" />
                           <Cell fill="#8B5CF6" />
                         </Pie>
-                        <Legend verticalAlign="bottom" height={18} />
+                        <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 12 }} />
                         <ReTooltip />
                       </PieChart>
                     </ResponsiveContainer>
