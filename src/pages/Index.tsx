@@ -44,18 +44,29 @@ const Index = () => {
     setCurrentSection('setup');
   };
 
-  const handleConfigureInterview = async (config: InterviewConfig) => {
-    // Fetch AI questions from backend (non-repeating for user)
-    try {
-      // Use the configured questionCount (default 15) and request that many questions
-      const count = config.questionCount || 15;
-      const questions = await fetchAiQuestions({ type: config.type, role: config.role, level: config.experience, count });
-      setInterviewConfig({ ...config, questions });
-    } catch {
-      // If AI fails, fall back to no questions (component will use defaults)
-      setInterviewConfig(config);
-    }
-    setCurrentSection('interview');
+  
+    
+    const handleConfigureInterview = async (config: InterviewConfig) => {
+      // Fetch AI questions from backend (non-repeating for user)
+      try {
+        const count = config.questionCount || 15;
+        const aiQuestions = await fetchAiQuestions({ type: config.type, role: config.role, level: config.experience, count });
+        setInterviewConfig({ ...config, questions: aiQuestions });
+      } catch (e: any) {
+        // failed to fetch AI questions, proceed with fallback but inform the user
+        const message = e?.message || (e?.toString && e.toString()) || 'Failed to fetch AI questions';
+        // show a toast if available, otherwise console.warn
+        try {
+          // use the app's toast hook if available
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const { useToast } = require('../components/ui/use-toast');
+          const toast = useToast();
+          toast?.toast?.({ title: 'AI questions unavailable', description: message, variant: 'destructive' });
+        } catch (_) {
+          console.warn('AI question fetch failed:', message);
+        }
+      }
+      setCurrentSection('interview');
   };
 
   const handleEndInterview = async (results: InterviewResults) => {

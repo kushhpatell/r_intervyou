@@ -66,19 +66,21 @@ router.get('/auth/me', authMiddleware, async (req, res) => {
 });
 
 // AI - generate questions (non-repeating per user)
-router.post('/ai/generate-questions', authMiddleware, async (req, res) => {
+// This endpoint is public so non-authenticated users can still request question sets.
+router.post('/ai/generate-questions', async (req, res) => {
 	try {
-		const userId = (req as any).userId as string;
-		let { type, role, level, count } = req.body as { type: string; role: string; level: string; count?: number };
-		if (!type || !role || !level) return res.status(400).json({ message: 'Missing fields' });
+	// userId is optional for public requests; use provided userId if present (for de-duplication)
+	const userId = (req as any).userId as string | undefined;
+	let { type, role, level, count } = req.body as { type: string; role: string; level: string; count?: number };
+	if (!type || !role || !level) return res.status(400).json({ message: 'Missing fields' });
 
-		// If role is UPSC, always use UPSC question set
-		if (role === 'UPSC') type = 'upsc';
+	// If role is UPSC, always use UPSC question set
+	if (role === 'UPSC') type = 'upsc';
 
-		// Default to 15 questions for a full practice run, but cap at 20 to keep sessions reasonable
-		const requestedCount = Math.min(Math.max(Number(count) || 15, 1), 20);
-		const questions = await generateUniqueQuestions({ userId, type, role, level, count: requestedCount });
-		return res.json({ questions });
+	// Default to 15 questions for a full practice run, but cap at 20 to keep sessions reasonable
+	const requestedCount = Math.min(Math.max(Number(count) || 15, 1), 20);
+	const questions = await generateUniqueQuestions({ userId: userId || '', type, role, level, count: requestedCount });
+	return res.json({ questions });
 	} catch (e: any) {
 		return res.status(500).json({ message: e?.message || 'Failed to generate questions' });
 	}
