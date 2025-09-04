@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -10,6 +10,7 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts';
+import html2canvas from 'html2canvas';
 
 interface InterviewResultsProps {
   results: {
@@ -87,9 +88,21 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
     return Array.from(tipsSet).slice(0, 10);
   };
 
+  const dashboardRef = useRef<HTMLDivElement | null>(null);
+
+  const downloadDashboard = async () => {
+    if (!dashboardRef.current) return;
+    const canvas = await html2canvas(dashboardRef.current, { scale: 2 });
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'interview-results.png';
+    a.click();
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8" ref={dashboardRef}>
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex justify-center">
@@ -366,7 +379,7 @@ const InterviewResults = ({ results, onRetakeInterview, onGoHome }: InterviewRes
             <Home className="h-4 w-4" />
             Back to Home
           </Button>
-          <Button variant="secondary" className="gap-2">
+          <Button variant="secondary" className="gap-2" onClick={downloadDashboard}>
             <Download className="h-4 w-4" />
             Download Report
           </Button>
